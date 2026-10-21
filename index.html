@@ -19,7 +19,7 @@
 <main class="wrap">
   <section class="panel">
     <div class="row">
-      <div><label for="api">Cloudflare Worker URL</label><input id="api" value="https://english-progress-teacher.maczone61.workers.dev" autocomplete="url"></div>
+      <div><label for="api">Cloudflare Worker URL</label><input id="api" value="https://saudi-grammar-teacher.maczone61.workers.dev" autocomplete="url"></div>
       <div><label for="count">Questions for this topic</label><select id="count"><option value="20">20 questions</option><option value="50">50 questions</option><option value="100">100 questions</option></select></div>
     </div>
     <div class="sub" style="margin-top:8px">Choose a grammar topic. The lesson and question bank are generated when you request them. Each generation uses Workers AI.</div>
@@ -37,6 +37,12 @@
   </section>
   <section id="lessonPanel" class="panel hidden">
     <div class="row"><div><h2 id="lessonTitle" style="margin:0"></h2><div id="lessonObjectives" class="sub"></div></div><span class="pill">Arabic + English subtitle</span></div>
+    <div class="actions" aria-label="Lesson voice controls">
+      <button id="speakArabicBtn" type="button">🔊 Read Arabic lesson</button>
+      <button id="speakEnglishBtn" type="button" class="secondary">🔊 Read English subtitles</button>
+      <button id="stopSpeechBtn" type="button" class="secondary">Stop voice</button>
+    </div>
+    <div class="sub" id="voiceStatus" role="status">Use the voice buttons to listen to the lesson.</div>
     <div id="lessonContent"></div>
     <div class="section"><div class="ar" id="recapAr"></div><div class="en-sub" id="recapEn"></div></div>
     <div class="section"><strong>Homework</strong><p id="homework"></p></div>
@@ -107,10 +113,16 @@ function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className
 async function getLesson(){
   setStatus("Creating a detailed Arabic lesson with English subtitles…");setProgress(8);
   const result=await post("/lesson-plan",{topic:selected[1],level:"Primary / Grade 5",classLevel:"Grade 5",curriculum:"Saudi Arabia national-curriculum context",scope:selected[2]});
+  if(!result.lesson || !Array.isArray(result.lesson.sections)){throw new Error("The Worker did not return a lesson in the expected format. Confirm that the new saudi-grammar-teacher Worker code is deployed and that the Worker URL above is correct.");}
   lesson=result.lesson;renderLesson();setProgress(100);setStatus("Lesson ready: "+selected[1]);
 }
 function renderLesson(){
   $("lessonPanel").classList.remove("hidden");
+  if ("speechSynthesis" in window) {
+    $("voiceStatus").textContent = "Voice teaching is available through your browser. Choose Arabic lesson or English subtitles.";
+  } else {
+    $("voiceStatus").textContent = "This browser does not support built-in speech. Try opening the app in Chrome.";
+  }
   $("lessonTitle").textContent=(lesson.titleArabic||selected[1])+" — "+(lesson.titleEnglish||selected[1]);
   $("lessonObjectives").textContent=(lesson.objectivesArabic||[]).join(" • ")+" | "+(lesson.objectivesEnglish||[]).join(" • ");
   const host=$("lessonContent");host.innerHTML="";
@@ -138,6 +150,50 @@ function renderLesson(){
   $("recapEn").textContent=lesson.recapEnglish||"";
   $("homework").textContent=lesson.homeworkEnglish||"";
 }
+function collectLessonSpeech(language){
+  if (!lesson) return "";
+  const parts=[];
+  if (language === "ar") {
+    if (lesson.titleArabic) parts.push(lesson.titleArabic);
+    (lesson.sections||[]).forEach(section=>{
+      if(section.titleArabic) parts.push(section.titleArabic);
+      if(section.explanationArabic) parts.push(section.explanationArabic);
+      (section.keyPointsArabic||[]).forEach(point=>parts.push(point));
+      (section.examples||[]).forEach(example=>{if(example.arabic)parts.push(example.arabic);});
+    });
+    if(lesson.recapArabic) parts.push("الخلاصة", lesson.recapArabic);
+  } else {
+    if (lesson.titleEnglish) parts.push(lesson.titleEnglish);
+    (lesson.sections||[]).forEach(section=>{
+      if(section.titleEnglish) parts.push(section.titleEnglish);
+      if(section.subtitleEnglish) parts.push(section.subtitleEnglish);
+      (section.keyPointsEnglish||[]).forEach(point=>parts.push(point));
+      (section.examples||[]).forEach(example=>{if(example.english)parts.push(example.english);});
+    });
+    if(lesson.recapEnglish) parts.push("Summary", lesson.recapEnglish);
+    if(lesson.homeworkEnglish) parts.push("Homework", lesson.homeworkEnglish);
+  }
+  return parts.filter(Boolean).join(". ");
+}
+function speakLesson(language){
+  if (!lesson) { $("voiceStatus").textContent="Please load a lesson first by pressing Teach this topic."; return; }
+  if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+    $("voiceStatus").textContent="Voice is not supported in this browser. Open this page in Chrome and try again."; return;
+  }
+  const text=collectLessonSpeech(language);
+  if(!text.trim()){ $("voiceStatus").textContent="There is no lesson text available to read."; return; }
+  window.speechSynthesis.cancel();
+  const utterance=new SpeechSynthesisUtterance(text);
+  utterance.lang=language === "ar" ? "ar-SA" : "en-US";
+  utterance.rate=0.85;
+  utterance.onstart=()=>$("voiceStatus").textContent=language === "ar" ? "Reading the Arabic explanation aloud…" : "Reading the English subtitles aloud…";
+  utterance.onend=()=>$("voiceStatus").textContent="Finished reading. Choose a voice button to listen again.";
+  utterance.onerror=(event)=>$("voiceStatus").textContent="Speech could not start ("+(event.error||"unknown error")+"). Check your phone's text-to-speech settings and try Chrome.";
+  window.speechSynthesis.speak(utterance);
+}
+$("speakArabicBtn").addEventListener("click",()=>speakLesson("ar"));
+$("speakEnglishBtn").addEventListener("click",()=>speakLesson("en"));
+$("stopSpeechBtn").addEventListener("click",()=>{if("speechSynthesis" in window)window.speechSynthesis.cancel();$("voiceStatus").textContent="Voice stopped.";});
 function normalizeAnswer(s){return String(s||"").toLowerCase().trim().replace(/[’‘]/g,"'").replace(/[.!?]+$/,"").replace(/\s+/g," ");}
 function renderQuestions(){
   $("exercisePanel").classList.remove("hidden");
