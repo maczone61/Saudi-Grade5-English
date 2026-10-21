@@ -150,47 +150,126 @@ function renderLesson(){
   $("recapEn").textContent=lesson.recapEnglish||"";
   $("homework").textContent=lesson.homeworkEnglish||"";
 }
-function collectLessonSpeech(language){
+
+function collectLessonSpeech(language) {
   if (!lesson) return "";
-  const parts=[];
+
+  const parts = [];
+
   if (language === "ar") {
     if (lesson.titleArabic) parts.push(lesson.titleArabic);
-    (lesson.sections||[]).forEach(section=>{
-      if(section.titleArabic) parts.push(section.titleArabic);
-      if(section.explanationArabic) parts.push(section.explanationArabic);
-      (section.keyPointsArabic||[]).forEach(point=>parts.push(point));
-      (section.examples||[]).forEach(example=>{if(example.arabic)parts.push(example.arabic);});
+
+    (lesson.sections || []).forEach(section => {
+      if (section.titleArabic) parts.push(section.titleArabic);
+      if (section.explanationArabic) parts.push(section.explanationArabic);
+
+      (section.keyPointsArabic || []).forEach(point => {
+        if (point) parts.push(point);
+      });
+
+      (section.examples || []).forEach(example => {
+        if (example.arabic) parts.push(example.arabic);
+      });
     });
-    if(lesson.recapArabic) parts.push("الخلاصة", lesson.recapArabic);
+
+    if (lesson.recapArabic) {
+      parts.push("الخلاصة", lesson.recapArabic);
+    }
   } else {
     if (lesson.titleEnglish) parts.push(lesson.titleEnglish);
-    (lesson.sections||[]).forEach(section=>{
-      if(section.titleEnglish) parts.push(section.titleEnglish);
-      if(section.subtitleEnglish) parts.push(section.subtitleEnglish);
-      (section.keyPointsEnglish||[]).forEach(point=>parts.push(point));
-      (section.examples||[]).forEach(example=>{if(example.english)parts.push(example.english);});
+
+    (lesson.sections || []).forEach(section => {
+      if (section.titleEnglish) parts.push(section.titleEnglish);
+      if (section.subtitleEnglish) parts.push(section.subtitleEnglish);
+
+      (section.keyPointsEnglish || []).forEach(point => {
+        if (point) parts.push(point);
+      });
+
+      (section.examples || []).forEach(example => {
+        if (example.english) parts.push(example.english);
+      });
     });
-    if(lesson.recapEnglish) parts.push("Summary", lesson.recapEnglish);
-    if(lesson.homeworkEnglish) parts.push("Homework", lesson.homeworkEnglish);
+
+    if (lesson.recapEnglish) parts.push("Summary", lesson.recapEnglish);
+    if (lesson.homeworkEnglish) parts.push("Homework", lesson.homeworkEnglish);
   }
+
   return parts.filter(Boolean).join(". ");
 }
-function speakLesson(language){
-  if (!lesson) { $("voiceStatus").textContent="Please load a lesson first by pressing Teach this topic."; return; }
-  if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
-    $("voiceStatus").textContent="Voice is not supported in this browser. Open this page in Chrome and try again."; return;
+
+function speakLesson(language) {
+  const status = $("voiceStatus");
+
+  if (!lesson) {
+    status.textContent = "Please load a lesson first.";
+    return;
   }
-  const text=collectLessonSpeech(language);
-  if(!text.trim()){ $("voiceStatus").textContent="There is no lesson text available to read."; return; }
-  window.speechSynthesis.cancel();
-  const utterance=new SpeechSynthesisUtterance(text);
-  utterance.lang=language === "ar" ? "ar-SA" : "en-US";
-  utterance.rate=0.85;
-  utterance.onstart=()=>$("voiceStatus").textContent=language === "ar" ? "Reading the Arabic explanation aloud…" : "Reading the English subtitles aloud…";
-  utterance.onend=()=>$("voiceStatus").textContent="Finished reading. Choose a voice button to listen again.";
-  utterance.onerror=(event)=>$("voiceStatus").textContent="Speech could not start ("+(event.error||"unknown error")+"). Check your phone's text-to-speech settings and try Chrome.";
-  window.speechSynthesis.speak(utterance);
+
+  if (!("speechSynthesis" in window) ||
+      !("SpeechSynthesisUtterance" in window)) {
+    status.textContent = "Speech is not supported in this browser.";
+    return;
+  }
+
+  const text = collectLessonSpeech(language);
+
+  if (!text.trim()) {
+    status.textContent = language === "ar"
+      ? "No Arabic lesson text was found."
+      : "No English lesson text was found.";
+    return;
+  }
+
+  const synth = window.speechSynthesis;
+  synth.cancel();
+
+  const voices = synth.getVoices();
+  const utterance = new SpeechSynthesisUtterance(text);
+
+  if (language === "ar") {
+    utterance.lang = "ar-SA";
+
+    const arabicVoice = voices.find(v =>
+      /^ar(-|$)/i.test(v.lang)
+    );
+
+    if (arabicVoice) {
+      utterance.voice = arabicVoice;
+      utterance.lang = arabicVoice.lang;
+    }
+
+    status.textContent = arabicVoice
+      ? "Starting Arabic voice: " + arabicVoice.name
+      : "Trying Arabic speech. Checking available phone voices…";
+  } else {
+    utterance.lang = "en-US";
+    const englishVoice = voices.find(v =>
+      /^en(-|$)/i.test(v.lang)
+    );
+    if (englishVoice) utterance.voice = englishVoice;
+  }
+
+  utterance.rate = 0.85;
+
+  utterance.onstart = () => {
+    status.textContent = language === "ar"
+      ? "Reading the Arabic explanation aloud…"
+      : "Reading the English subtitles aloud…";
+  };
+
+  utterance.onend = () => {
+    status.textContent = "Finished reading.";
+  };
+
+  utterance.onerror = event => {
+    status.textContent =
+      "Speech error: " + (event.error || "unknown error");
+  };
+
+  synth.speak(utterance);
 }
+
 $("speakArabicBtn").addEventListener("click",()=>speakLesson("ar"));
 $("speakEnglishBtn").addEventListener("click",()=>speakLesson("en"));
 $("stopSpeechBtn").addEventListener("click",()=>{if("speechSynthesis" in window)window.speechSynthesis.cancel();$("voiceStatus").textContent="Voice stopped.";});
