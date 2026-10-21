@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#10131d">
+<title>English Progress Teacher — Saudi Grade 5</title>
+<style>
+:root{--bg:#10131d;--panel:#191e2c;--panel2:#20283a;--line:#30394e;--text:#f1f4fb;--muted:#aab5ca;--accent:#8b9dff;--mint:#69dfc1;--bad:#ff9a9a;--good:#80e3b1}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0%,#202b45 0,transparent 35%),var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:12px;padding:11px 15px;background:var(--accent);color:#10131d;font-weight:750}button.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}button:disabled{opacity:.5;cursor:wait}header{padding:22px 16px 14px;max-width:1050px;margin:auto}header .eyebrow{color:var(--mint);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.76rem}h1{font-size:clamp(1.55rem,5vw,2.4rem);line-height:1.15;margin:.35rem 0}header p{color:var(--muted);margin:.55rem 0 0}.wrap{max-width:1050px;margin:auto;padding:0 14px 42px}.panel{background:rgba(25,30,44,.96);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 10px 30px #0002}.grid{display:grid;grid-template-columns:1fr;gap:12px}@media(min-width:720px){.grid.two{grid-template-columns:1fr 1fr}.topic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}label{display:block;color:var(--muted);font-size:.88rem;margin-bottom:5px}select,input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:#111725;color:var(--text)}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}.topic-grid{display:grid;grid-template-columns:1fr;gap:9px}.topic{display:flex;align-items:center;gap:10px;text-align:left;background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:12px;border-radius:13px;min-height:58px}.topic .num{display:grid;place-items:center;flex:0 0 32px;height:32px;border-radius:10px;background:#303b58;color:var(--mint);font-weight:800}.topic.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}.topic small{display:block;color:var(--muted);font-weight:400}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:4px 9px;color:var(--muted);font-size:.78rem}.sub{color:var(--muted);font-size:.9rem}.section{padding:15px 0;border-top:1px solid var(--line)}.section:first-child{border-top:0}.ar{direction:rtl;text-align:right;font-family:system-ui,"Noto Naskh Arabic","Tahoma",sans-serif;font-size:1.03rem;line-height:1.95;white-space:pre-wrap}.en-sub{color:#c7d2ff;border-left:3px solid var(--accent);padding:7px 11px;margin:8px 0 12px;font-size:.94rem}.examples{display:grid;gap:8px;margin-top:10px}.example{background:#111725;border:1px solid var(--line);padding:10px;border-radius:11px}.example .ex-ar{direction:rtl;text-align:right;color:var(--muted);margin-top:4px}.question{padding:15px 0;border-top:1px solid var(--line)}.question:first-child{border-top:0}.qtitle{font-weight:750;margin-bottom:8px}.options{display:grid;gap:7px}.opt{display:flex;gap:9px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:9px;background:#121827}.opt input{width:auto;margin-top:6px;accent-color:var(--accent)}.answer{margin-top:9px;padding:10px;border-radius:10px;background:#111725;border:1px solid var(--line)}.correct{color:var(--good)}.incorrect{color:var(--bad)}.hidden{display:none!important}.progress{height:8px;background:#0d111b;border-radius:20px;overflow:hidden;margin:10px 0}.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--mint));width:0}.status{color:var(--muted);font-size:.9rem;margin-top:8px}.notice{border-left:3px solid var(--mint);padding:9px 12px;background:#14232b;border-radius:8px;color:#d4f8ed;font-size:.9rem}.foot{color:var(--muted);font-size:.8rem;text-align:center;padding:18px}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Saudi Grade 5 · Grammar learning</div>
+  <h1>English Progress Teacher</h1>
+  <p>Detailed grammar lessons in Arabic with English subtitles. All practice questions are in English.</p>
+</header>
+<main class="wrap">
+  <section class="panel">
+    <div class="row">
+      <div><label for="api">Cloudflare Worker URL</label><input id="api" value="https://english-progress-teacher.maczone61.workers.dev" autocomplete="url"></div>
+      <div><label for="count">Questions for this topic</label><select id="count"><option value="20">20 questions</option><option value="50">50 questions</option><option value="100">100 questions</option></select></div>
+    </div>
+    <div class="sub" style="margin-top:8px">Choose a grammar topic. The lesson and question bank are generated when you request them. Each generation uses Workers AI.</div>
+  </section>
+  <section class="panel">
+    <h2 style="margin-top:0">Choose a topic</h2>
+    <div id="topics" class="topic-grid"></div>
+    <div class="actions">
+      <button id="lessonBtn">Teach this topic</button>
+      <button id="exerciseBtn" class="secondary">Generate exercises</button>
+      <button id="bothBtn" class="secondary">Lesson + exercises</button>
+    </div>
+    <div id="status" class="status" role="status"></div>
+    <div class="progress"><span id="progress"></span></div>
+  </section>
+  <section id="lessonPanel" class="panel hidden">
+    <div class="row"><div><h2 id="lessonTitle" style="margin:0"></h2><div id="lessonObjectives" class="sub"></div></div><span class="pill">Arabic + English subtitle</span></div>
+    <div id="lessonContent"></div>
+    <div class="section"><div class="ar" id="recapAr"></div><div class="en-sub" id="recapEn"></div></div>
+    <div class="section"><strong>Homework</strong><p id="homework"></p></div>
+  </section>
+  <section id="exercisePanel" class="panel hidden">
+    <div class="row"><div><h2 style="margin:0">Practice questions</h2><div id="questionMeta" class="sub"></div></div><button class="secondary" id="checkBtn">Check answers</button></div>
+    <div id="questions"></div>
+    <div class="actions"><button id="checkBtnBottom">Check answers</button><button id="moreBtn" class="secondary">Generate another set</button></div>
+    <div id="score" class="notice hidden" style="margin-top:12px"></div>
+  </section>
+  <section class="panel">
+    <h3 style="margin-top:0">Learning rule</h3>
+    <div class="ar">يُشرح الدرس باللغة العربية، ويأتي تحته عنوان فرعي باللغة الإنجليزية. أما الأسئلة والاختيارات والمهام التدريبية فتكون باللغة الإنجليزية فقط.</div>
+    <div class="en-sub">Lessons are explained in Arabic with English subtitles. All questions, options and practice tasks are in English only.</div>
+    <div class="sub">This is an original practice resource for Saudi Grade 5 learners, not an official Ministry of Education examination paper.</div>
+  </section>
+  <div class="foot">English Progress Teacher · Saudi Grade 5 Grammar Edition</div>
+</main>
+<script>
+const TOPIC_LIST = [
+ ["parts-of-speech","Parts of Speech","Word classes and function in context"],
+ ["nouns","Nouns","Types, forms, countability and plurals"],
+ ["pronouns","Pronouns","Personal, possessive, demonstrative and more"],
+ ["verbs","Verbs","Main/helping verbs and verb forms"],
+ ["adjectives","Adjectives","Types, position and comparison"],
+ ["adverbs","Adverbs","Manner, time, place, frequency and degree"],
+ ["prepositions","Prepositions","Time, place, movement and position"],
+ ["conjunctions","Conjunctions","Addition, contrast, choice, reason and result"],
+ ["interjections","Interjections","Feelings, reactions and punctuation"],
+ ["articles","Articles","A, an, the and when no article is used"],
+ ["simple-present","Simple Present","Habits, facts, questions and negatives"],
+ ["simple-past","Simple Past","Regular/irregular verbs, did, was and were"],
+ ["plurals","Plurals","Regular spelling patterns and irregular forms"],
+ ["basic-questions","Basic Questions","WH-questions and yes/no questions"],
+ ["capitalisation","Capitalisation","Names, places, sentence beginnings and I"],
+ ["punctuation","Punctuation","Full stops, commas, question marks and more"]
+];
+const $ = id => document.getElementById(id);
+let selected = TOPIC_LIST[0];
+let lesson = null;
+let questions = [];
+let answerState = {};
+let generatedForTopic = "";
+let isBusy = false;
+
+function renderTopics(){
+  $("topics").innerHTML = "";
+  TOPIC_LIST.forEach((t,i)=>{
+    const b=document.createElement("button");
+    b.type="button"; b.className="topic"+(selected[0]===t[0]?" active":"");
+    b.innerHTML=`<span class="num">${String(i+1).padStart(2,"0")}</span><span><strong>${t[1]}</strong><small>${t[2]}</small></span>`;
+    b.onclick=()=>{selected=t;renderTopics();setStatus("Selected: "+t[1]);};
+    $("topics").appendChild(b);
+  });
+}
+function setStatus(s){$("status").textContent=s;}
+function setProgress(p){$("progress").style.width=Math.max(0,Math.min(100,p))+"%";}
+function setBusy(v){isBusy=v;["lessonBtn","exerciseBtn","bothBtn","moreBtn","checkBtn","checkBtnBottom"].forEach(id=>{if($(id))$(id).disabled=v;});}
+function apiBase(){return $("api").value.trim().replace(/\/+$/,"");}
+async function post(path,data){
+  const response=await fetch(apiBase()+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
+  const raw=await response.text();
+  let obj;try{obj=JSON.parse(raw)}catch{throw new Error("Worker did not return JSON. Check the Worker URL and deployment.");}
+  if(!response.ok||obj.error)throw new Error(obj.error||("Request failed: "+response.status));
+  return obj;
+}
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;}
+async function getLesson(){
+  setStatus("Creating a detailed Arabic lesson with English subtitles…");setProgress(8);
+  const result=await post("/lesson-plan",{topic:selected[1],level:"Primary / Grade 5",classLevel:"Grade 5",curriculum:"Saudi Arabia national-curriculum context",scope:selected[2]});
+  lesson=result.lesson;renderLesson();setProgress(100);setStatus("Lesson ready: "+selected[1]);
+}
+function renderLesson(){
+  $("lessonPanel").classList.remove("hidden");
+  $("lessonTitle").textContent=(lesson.titleArabic||selected[1])+" — "+(lesson.titleEnglish||selected[1]);
+  $("lessonObjectives").textContent=(lesson.objectivesArabic||[]).join(" • ")+" | "+(lesson.objectivesEnglish||[]).join(" • ");
+  const host=$("lessonContent");host.innerHTML="";
+  (lesson.sections||[]).forEach((s,i)=>{
+    const wrap=el("div","section");
+    const h=el("h3","",`${i+1}. ${s.titleArabic||""}`);
+    h.style.direction="rtl";h.style.textAlign="right";h.style.marginBottom="0";
+    wrap.appendChild(h);wrap.appendChild(el("div","en-sub",s.titleEnglish||""));
+    wrap.appendChild(el("div","ar",s.explanationArabic||""));
+    wrap.appendChild(el("div","en-sub",s.subtitleEnglish||""));
+    if(s.examples&&s.examples.length){
+      const examples=el("div","examples");
+      s.examples.forEach(ex=>{
+        const box=el("div","example");box.appendChild(el("div","",ex.english));
+        if(ex.arabic)box.appendChild(el("div","ex-ar",ex.arabic));
+        examples.appendChild(box);
+      });wrap.appendChild(examples);
+    }
+    if(s.keyPointsArabic&&s.keyPointsArabic.length){
+      const ul=el("ul","");s.keyPointsArabic.forEach((k,j)=>{const li=el("li","");li.appendChild(el("div","ar",k));if(s.keyPointsEnglish&&s.keyPointsEnglish[j])li.appendChild(el("div","en-sub",s.keyPointsEnglish[j]));ul.appendChild(li);});wrap.appendChild(ul);
+    }
+    host.appendChild(wrap);
+  });
+  $("recapAr").textContent=lesson.recapArabic||"";
+  $("recapEn").textContent=lesson.recapEnglish||"";
+  $("homework").textContent=lesson.homeworkEnglish||"";
+}
+function normalizeAnswer(s){return String(s||"").toLowerCase().trim().replace(/[’‘]/g,"'").replace(/[.!?]+$/,"").replace(/\s+/g," ");}
+function renderQuestions(){
+  $("exercisePanel").classList.remove("hidden");
+  $("questionMeta").textContent=`${questions.length} questions · ${selected[1]} · questions in English only`;
+  const host=$("questions");host.innerHTML="";
+  questions.forEach((q,i)=>{
+    const card=el("div","question");
+    card.appendChild(el("div","qtitle",`${i+1}. ${q.prompt}`));
+    if(q.options&&q.options.length){
+      const opts=el("div","options");
+      q.options.forEach((op,j)=>{
+        const lab=el("label","opt");
+        const input=document.createElement("input");input.type="radio";input.name="q"+i;input.value=String(j);input.checked=answerState[i]===String(j);
+        input.onchange=()=>{answerState[i]=String(j);};
+        lab.appendChild(input);lab.appendChild(el("span","",`${String.fromCharCode(65+j)}. ${op}`));opts.appendChild(lab);
+      });card.appendChild(opts);
+    }else{
+      const input=document.createElement("input");input.type="text";input.placeholder="Write your answer in English";input.value=answerState[i]||"";
+      input.oninput=()=>answerState[i]=input.value;card.appendChild(input);
+    }
+    const feedback=el("div","answer hidden");feedback.id="feedback"+i;card.appendChild(feedback);
+    host.appendChild(card);
+  });
+  $("score").classList.add("hidden");
+}
+function checkAnswers(){
+  let score=0,marked=0;
+  questions.forEach((q,i)=>{
+    const fb=$("feedback"+i);fb.classList.remove("hidden");fb.innerHTML="";
+    let user=answerState[i]||"",correct=false;
+    if(q.options&&q.options.length){correct=String(q.correctIndex)===String(user);user=user===""?"No answer":q.options[Number(user)];}
+    else {const accepted=[q.answer,...(q.acceptedAnswers||[])].map(normalizeAnswer);correct=accepted.includes(normalizeAnswer(user));}
+    if(user!=="No answer"&&String(user).trim())marked++;
+    if(correct)score++;
+    fb.appendChild(el("div",correct?"correct":"incorrect",correct?"Correct":"Review this answer"));
+    fb.appendChild(el("div","",`Answer: ${q.answer||q.options?.[q.correctIndex]||"See lesson"}`));
+    fb.appendChild(el("div","ar",q.explanationArabic||""));
+    fb.appendChild(el("div","en-sub",q.subtitleEnglish||""));
+  });
+  $("score").classList.remove("hidden");
+  $("score").textContent=`Score: ${score} / ${questions.length} · Attempted: ${marked} / ${questions.length}. Review the Arabic explanations and English subtitles below each answer.`;
+  $("score").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+async function generateExercises(append=false){
+  if(!append){questions=[];answerState={};}
+  const target=Number($("count").value);
+  const old=questions.length;
+  const desiredTotal=append?old+Math.min(10,target):target;
+  let attempts=0;
+  setStatus(`Generating ${desiredTotal-old} questions in small batches. Please keep this page open…`);
+  setProgress(5);setBusy(true);
+  try{
+    while(questions.length<desiredTotal && attempts<Math.ceil((desiredTotal-old)/10)+6){
+      attempts++;
+      const batchCount=Math.min(10,desiredTotal-questions.length);
+      const prior=questions.map(q=>q.prompt);
+      const result=await post("/exercise-set",{topic:selected[1],level:"Primary / Grade 5",classLevel:"Grade 5",curriculum:"Saudi Arabia national-curriculum context",count:batchCount,lesson:lesson||{},existingQuestions:prior});
+      const fresh=result.questions||[];
+      if(!fresh.length){
+        if(attempts>=Math.ceil((desiredTotal-old)/10)+6) throw new Error("The AI could not create enough valid new questions. Try again later.");
+        setStatus("The AI returned no new valid questions; retrying with the remaining questions…");
+        continue;
+      }
+      questions.push(...fresh);
+      setProgress(Math.round(100*questions.length/desiredTotal));
+      setStatus(`Generated ${questions.length} of ${desiredTotal} questions…`);
+    }
+    generatedForTopic=selected[0];
+    renderQuestions();
+    setStatus(questions.length>=desiredTotal?`Ready: ${questions.length} English-only questions for ${selected[1]}.`:`Generated ${questions.length} questions. Some questions could not be generated; you can request another set.`);
+    setProgress(100);
+  }catch(e){setStatus("Generation error: "+e.message);setProgress(0);if(questions.length)renderQuestions();}
+  finally{setBusy(false);}
+}
+$("lessonBtn").onclick=async()=>{if(isBusy)return;setBusy(true);try{await getLesson()}catch(e){setStatus("Lesson error: "+e.message);setProgress(0)}finally{setBusy(false)}};
+$("exerciseBtn").onclick=()=>{if(!isBusy)generateExercises(false)};
+$("bothBtn").onclick=async()=>{if(isBusy)return;setBusy(true);try{await getLesson();setBusy(false);await generateExercises(false)}catch(e){setStatus("Error: "+e.message);setProgress(0);setBusy(false)}};
+$("checkBtn").onclick=checkAnswers;$("checkBtnBottom").onclick=checkAnswers;
+$("moreBtn").onclick=()=>{if(!isBusy)generateExercises(true)};
+renderTopics();
+</script>
+</body>
+</html>
